@@ -1,0 +1,263 @@
+---
+title: "Ayudantía 1"
+author: "Juan Felipe Ly"
+date: "19/08/2021"
+output:
+  html_document:
+    df_print: paged
+subtitle: Econometría I
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+# Pregunta 1
+
+(a) Genere un vector que contenga la siguiente secuencia de números de 1 al 10: 1, 2, 3... 10.
+
+```{r}
+x1 <- seq(1, 10, 1) #opción 1
+x1
+```
+
+```{r}
+x2 <- 1:10 #opción 2
+x2
+```
+
+```{r}
+x3 <- seq(10) #opción 3
+x3
+```
+
+```{r}
+x4 <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10) #opción 4
+x4
+```
+
+
+(b) Genere un vector del 1 al 5 que contenga 10 elementos.
+
+```{r}
+x1 <- seq(1,5, length=10)
+x1
+```
+
+\pagebreak
+
+(c) Genere un vector que contenga los números: 10, 30, 50 y luego calcule su suma, suma acumulada y suma de los cuadrados de cada uno de los números.
+
+```{r}
+z <- c(10, 30, 50)
+names(z) <- c("A", "B", "C")
+z
+```
+
+```{r}
+sum(z) # Suma
+```
+
+```{r}
+cumsum(z) # suma acumulada
+```
+
+```{r}
+sum(z**2) #suma de los cuadrados
+```
+
+# Pregunta 2
+
+El vector vida_util contiene los años de vida útil restante de 5 máquinas, excepto para las máquinas B y D: 
+
+```{r}
+vida_util <- c("A"=6, "B"=NA, "C"=10, "D"=NA, "E"=20)
+```
+
+(a) Defina un vector $y$ que excluya los missing values (NA).
+
+```{r}
+y <- vida_util[-c(2,4)] #forma 1
+y
+```
+
+
+```{r}
+y <- vida_util[c(-2,-4)] # forma 2
+y
+```
+
+
+```{r}
+y <- vida_util[!is.na(vida_util)] # forma 3
+y
+```
+
+
+```{r}
+y <- na.omit(vida_util) # forma 4
+y
+```
+
+(b) Calcule el promedio aritmético de la vida útil de las 5 máquinas.
+
+```{r}
+mean(vida_util, na.rm = TRUE) #forma 1
+```
+
+
+```{r}
+mean(vida_util[!is.na(vida_util)]) #forma 2
+```
+
+
+```{r}
+sum(vida_util[!is.na(vida_util)])/length(vida_util[!is.na(vida_util)]) #forma 3
+```
+
+
+(c) Calcule la proporción de máquinas que tienen una vida útil restante de 10 años o menos.
+
+```{r}
+mean(vida_util<=10, na.rm = TRUE)
+```
+
+
+(d) ¿Cuántas máquinas tienen una vida útil menor o igual a 10 años?
+
+```{r}
+sum(vida_util<=10, na.rm = TRUE)
+```
+
+\pagebreak
+
+# Pregunta 3
+
+La siguiente tabla presenta el número de unidades en stock de los productos 1 y 2 en cuatro zonas: 
+
+| zona | stock_1 | stock_2|
+|:-----| :-------|:-------|
+| A    | 800     | 700    |
+| B    | 200     | 300    |
+| C    | 700     | 600    |
+| D    | 300     | 400    |
+
+(a) Construya dicha tabla como un data frame/tibble y asigne el dataframe a stock_total_df y el tibble a stock_total_tb 
+
+
+```{r}
+zona <- c("A", "B", "C", "D")
+stock_1 <- c(800,200,700,300)
+stock_2 <- c(700,300,600,400)
+```
+
+```{r}
+stock_total_df <- data.frame(zona, stock_1, stock_2) # dataframe
+stock_total_df
+```
+
+```{r}
+stock_total_tb <- tibble(zona = c("A", "B", "C", "D"),
+                         stock_1 = c(800,200,700,300),
+                         stock_2 = c(700,300,600,400)
+                         )
+stock_total_tb
+```
+
+```{r}
+class(stock_total_tb)
+```
+
+\pagebreak
+
+(b) Escriba en el script summary(stock_total_tb) ¿Qué obtiene?
+
+```{r}
+summary(stock_total_tb)
+```
+
+(c) Escriba en el script str(stock_total_tb) y glimpse(stock_total_tb) ¿Qué obtiene?
+
+```{r}
+str(stock_total_tb) #forma 1
+```
+
+```{r}
+glimpse(stock_total_tb) #forma 2 - parte de dplyr
+```
+
+(d) Presente las primeras tres y últimas dos observaciones de stock_total_tb
+
+```{r}
+stock_total_tb %>% 
+  slice_head(n=3)
+```
+
+```{r}
+stock_total_tb %>% 
+  slice_tail(n=2)
+```
+
+\pagebreak
+
+(e) Construya un tibble con las observaciones de las variables zona y stock_2
+
+```{r}
+stock_total_tb %>% 
+  select(-stock_1) # forma 1
+```
+
+```{r}
+stock_total_tb %>% 
+  select(zona, stock_2) # forma 2
+```
+
+(f) Construya un tibble con los stocks de las zonas A y C
+
+```{r}
+stock_total_tb %>% filter(zona=="A" | zona=="C")
+```
+
+(g) Construya dos variables: (1) stock_total que sea igual a la suma de `stock_1` y `stock_2` y (2) `prop_stock` que es el porcentaje del stock total existente en una zona determinada.
+
+```{r}
+stock_total_tb <- stock_total_tb %>% 
+  mutate(stock_total = stock_1 + stock_2, 
+         prop_stock = (stock_total/sum(stock_total))*100)
+stock_total_tb
+```
+
+(h) Genere una variable que toma el valor “alto” si el stock total de una zona determinada es mayor a 1000 e igual a “bajo”, si no son mayores.
+
+```{r}
+stock_total_tb <- stock_total_tb %>% 
+  mutate(mayor = ifelse(stock_total > 1000, "alto", "bajo"))
+stock_total_tb
+```
+
+(i) Guarde stock_total_tb con extensión .csv
+
+```{r}
+write_csv(stock_total_tb, file = "stock_total.csv")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
