@@ -1,0 +1,160 @@
+---
+title: "Ayudantía 2"
+author: "Juan Felipe Ly"
+date: "26/08/2021"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+subtitle: Econometría I
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+```{r include=TRUE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(stargazer)
+library(kableExtra)
+library(skimr)
+library(predict3d)
+library(haven)
+```
+
+# Regresión Lineal Simple
+
+Los datos del fichero EdadPesoGrasas.txt corresponden a tres variables medidas en 25 individuos: edad, peso y cantidad de grasas en la sangre.
+
+a) Analice estadística descriptiva y muestre los nombres de las variables que contiene el dataset.
+
+```{r}
+grasas <- read.table("EdadPesoGrasas.txt", header = TRUE)
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+b) Represente las relaciones existentes entre las variables a través de una matriz de diagramas de dispersión. Además, calcule la matriz de coeficientes de correlación.
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+c) Encuentre la ecuación de la recta de Mínimos Cuadrados Ordinarios que relaciona la cantidad de grasas en la sangre en función de la edad.
+
+```{r results='asis'}
+
+```
+
+d) Añada la representación gráfica de la recta de mínimos cuadrados al diagrama de dispersión de las variables en cuestión.
+
+```{r}
+
+```
+
+e) Interprete los coeficientes estimados para $\beta_0$ y $\beta_1$.
+
+```{r}
+
+```
+
+
+# Aplicación en R
+
+La base de datos _ceosal1.dta_ contiene información correspondiente al año 1990, sobre 209 CEO. Los datos son usados en el libro "Introducción a la Econometría" de Jeffrey Wooldridge. La siguiente tabla presenta las variables y su descripción contenida en esta base de datos:
+
+| Variable                   | Descripción                 |
+|:---------------------------| :----------------------------|
+| salary                     | salario de 1990 (miles de dólares) |
+| pcsalary                   | % de cambio en salarios entre 1989 - 1990 |
+| sales                      | ventas de la empresa en 1990 (millones de dólares) |
+| roe                        | ROE promedio 1988 - 1990 |
+| pcroe                      | % cambio en ROE, 1988 - 1990 |
+| ros                        | retorno accionario, 1988 - 1990 |
+| indus                      | =1 si la firma pertenece al sector industrial |
+| finance                    | =1 si la firma pertenece al sector financiero |
+| consprod                   | =1 si la firma pertenece al retail |
+| utility                    | =1 si la firma pertenece al sector transporte o 
+|                            | servicios de utilidad pública |
+| lsalary                    | logaritmo natural del salario |
+| lsales                     | logaritmo natural de las ventas |
+
+
+Utilizando estos datos, se estimará el siguiente modelo que muestra la relación entre el rendimiento sobre el capital (roe) y el sueldo anual que reciben los CEO (salario):
+
+$$
+\begin{aligned}
+\widehat{Salario} & = \beta_0+ \beta_1 \cdot roe  + u \\
+\end{aligned}                    
+$$
+
+donde el parámetro de interés es $\beta_1$ el cual mide la variación del sueldo anual, en miles de dólares, que corresponde a un incremento de un punto porcentual en el rendimiento sobre el capital.
+
+a) Identifique el número de variables y observaciones que contiene la base de datos.
+
+
+```{r}
+ceosal <- read_dta("ceosal1.dta")
+```
+
+```{r}
+
+```
+
+b) Muestre las primeras 10 observaciones de la base de datos. 
+
+```{r}
+
+```
+
+c) Presente estadística descriptiva de las variables _salario y roe_.
+
+```{r}
+
+```
+
+d) Muestre la relación entre rendimiento sobre el capital y sueldos de los CEO, usando un gráfico de dispersión.
+
+```{r}
+
+```
+
+e) Estime el modelo especificado arriba usando _Mínimos Cuadrados Ordinarios_.
+
+```{r results='asis'}
+
+```
+
+f) Agregue al gráfico de dispersión construido en (d), la _línea de ajuste_ estimada en (e).
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+
+g) Calcule los sueldos predichos por el modelo estimado y los residuos. 
+
+```{r}
+
+```
+
+h) Muestre las primeras 10 observaciones de las variables _salary, roe, salario predicho y residuos_.
+
+```{r}
+
+```
+
