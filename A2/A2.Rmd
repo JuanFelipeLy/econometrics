@@ -1,0 +1,225 @@
+---
+title: "Ayudantía 2"
+author: "Juan Felipe Ly"
+date: "26/08/2021"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+subtitle: Econometría I
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+```{r include=TRUE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(stargazer)
+library(kableExtra)
+library(skimr)
+library(predict3d)
+library(haven)
+```
+
+# Regresión Lineal Simple
+
+Los datos del fichero EdadPesoGrasas.txt corresponden a tres variables medidas en 25 individuos: edad, peso (Kg) y cantidad de grasas en la sangre (Mg/Dl).
+
+a) Analice estadística descriptiva y muestre los nombres de las variables que contiene el dataset.
+
+```{r}
+grasas <- read.table("EdadPesoGrasas.txt", header = TRUE)
+```
+
+```{r}
+glimpse(grasas)
+```
+
+```{r}
+grasas %>%
+  select(edad, peso, grasas) %>%
+  skim() %>%
+  yank("numeric") %>%
+  select(-c("n_missing", "complete_rate", "hist")) %>%
+  kbl(booktabs = T,
+      col.names = c("Variable", "Media", "Desv. Estándar", "Mínimo",
+                    "p25", "p50", "p75", "Máximo"),
+      linesep = '',
+      digits = 1,
+      "html") %>%
+  kable_styling(latex_options = c("striped", "hold_position"))
+```
+
+
+b) Represente las relaciones existentes entre las variables a través de una matriz de diagramas de dispersión. Además, calcule la matriz de coeficientes de correlación.
+
+```{r}
+pairs(grasas)
+```
+
+```{r}
+grasas %>% ggplot(aes(x = edad, y = grasas)) + 
+  geom_point(aes(color = grasas), size = 5, alpha = 0.7) +
+  xlab("Edad") + 
+  ylab("Grasas") +
+  ggtitle("Relación entre edad y grasas") +
+  theme_minimal()
+```
+
+
+c) Encuentre la ecuación de la recta de Mínimos Cuadrados Ordinarios que relaciona la cantidad de grasas en la sangre en función de la edad.
+
+<center> 
+```{r results='asis'}
+regresion <- lm(grasas ~ edad, data = grasas)
+
+stargazer(regresion, 
+          type= "html",
+          header = FALSE,
+          no.space = FALSE)
+
+```
+</center>
+
+d) Añada la representación gráfica de la recta de mínimos cuadrados al diagrama de dispersión de las variables en cuestión.
+
+$$
+\begin{aligned}
+\widehat{grasas} & = 102.575+ 5.321 \cdot edad\\
+\end{aligned}  
+$$
+
+```{r}
+ggPredict(regresion, digits = 3, facet.modx = TRUE, text = FALSE)
+```
+
+
+e) Interprete los coeficientes estimados para $\beta_0$ y $\beta_1$.
+
+
+
+# Aplicación en R
+
+La base de datos _ceosal1.dta_ contiene información correspondiente al año 1990, sobre 209 CEO. Los datos son usados en el libro "Introducción a la Econometría" de Jeffrey Wooldridge. La siguiente tabla presenta las variables y su descripción contenida en esta base de datos:
+
+| Variable                   | Descripción                 |
+|:---------------------------| :----------------------------|
+| salary                     | salario de 1990 (miles de dólares) |
+| pcsalary                   | % de cambio en salarios entre 1989 - 1990 |
+| sales                      | ventas de la empresa en 1990 (millones de dólares) |
+| roe                        | ROE promedio 1988 - 1990 |
+| pcroe                      | % cambio en ROE, 1988 - 1990 |
+| ros                        | retorno accionario, 1988 - 1990 |
+| indus                      | =1 si la firma pertenece al sector industrial |
+| finance                    | =1 si la firma pertenece al sector financiero |
+| consprod                   | =1 si la firma pertenece al retail |
+| utility                    | =1 si la firma pertenece al sector transporte o 
+|                            | servicios de utilidad pública |
+| lsalary                    | logaritmo natural del salario |
+| lsales                     | logaritmo natural de las ventas|
+
+
+Utilizando estos datos, se estimará el siguiente modelo que muestra la relación entre el rendimiento sobre el capital (roe) y el sueldo anual que reciben los CEO (salario):
+
+$$
+\begin{aligned}
+\widehat{Salario} & = \beta_0+ \beta_1 \cdot roe  + u \\
+\end{aligned}                    
+$$
+
+donde el parámetro de interés es $\beta_1$ el cual mide la variación del sueldo anual, en miles de dólares, que corresponde a un incremento de un punto porcentual en el rendimiento sobre el capital.
+
+
+a) Identifique el número de variables y observaciones que contiene la base de datos.
+
+```{r}
+ceosal <- read_dta("ceosal1.dta")
+```
+
+```{r}
+glimpse(ceosal)
+```
+
+
+b) Muestre las primeras 5 observaciones de la base de datos. 
+
+```{r}
+ceosal %>% 
+  head(n=10)
+```
+
+
+c) Presente estadística descriptiva de las variables _salario y roe_.
+
+```{r}
+ceosal %>%
+  select(salary, roe) %>%
+  skim() %>%
+  yank("numeric") %>%
+  select(-c("n_missing", "complete_rate", "hist")) %>%
+  kbl(booktabs = T,
+      col.names = c("Variable", "Media", "Desv. Estándar", "Mínimo",
+                    "p25", "p50", "p75", "Máximo"),
+      linesep = '',
+      digits = 1) %>%
+  kable_styling(latex_options = c("striped", "hold_position"))
+```
+
+
+d) Muestre la relación entre rendimiento sobre el capital y sueldos de los CEO, usando un gráfico de dispersión.
+
+```{r}
+ceosal %>% ggplot(aes(x = roe, y = salary)) + 
+  geom_point(aes(color = roe), size = 5, alpha = 0.7) +
+  xlab('roe(%)') + 
+  ylab('Salary (M$USD)') +
+  ggtitle('Relación entre roe y salario') +
+  theme_minimal()
+```
+
+
+e) Estime el modelo especificado arriba usando _Mínimos Cuadrados Ordinarios_.
+
+```{r results='asis'}
+model <- lm(salary ~ roe, data = ceosal)
+
+stargazer(model, 
+          type= "html",
+          header = FALSE,
+          no.space = FALSE)
+
+```
+
+
+f) Agregue al gráfico de dispersión construido en (d), la _línea de ajuste_ estimada en (e).
+
+```{r}
+ggPredict(model, digits = 3, facet.modx = TRUE, text = FALSE)
+```
+
+```{r}
+ceosal %>% 
+  select(salary, roe) %>% 
+  filter(salary<=10000) %>% # Aquí apliqué un filtro para excluir los outliers
+  ggplot(aes(x = roe, y = salary)) + 
+    geom_point(aes(color = roe), size = 5, alpha = 0.7) +
+    xlab('roe(%)') + 
+    ylab('Salary (M$USD)') +
+    ggtitle('Relación entre edad y grasas') +
+    geom_smooth(method = "lm", colour = "blue")+
+    theme_minimal()
+```
+
+
+g) Calcule los sueldos predichos por el modelo estimado y los residuos y muestre las primeras 10 observaciones de las variables _salary, roe, salario predicho y residuos_.
+
+```{r}
+ceosal %>% mutate(PredSalary = predict(model),
+                   Residuo = residuals(model)) %>% 
+  select(salary, roe, PredSalary, Residuo) %>% 
+  slice_head(n=10)
+```
+
+
+
