@@ -71,6 +71,7 @@ e) Considere un modelo para explicar el precio de las bebidas refrescantes, `pso
 $$
 psoda = \beta_0 + \beta_1 \cdot (prpblck) + \beta_2 \cdot (income) + u
 $$
+
 Estime este modelo mediante MCO y muestre un resumen con los resultados de la estimación obtenidos.
  
 
