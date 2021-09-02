@@ -1,0 +1,167 @@
+---
+title: "Ayudantía 3"
+author: "Juan Felipe Ly"
+date: "02/09/2021"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+subtitle: Econometría I
+---
+
+# ¿Discriminan los precios de las cadenas de comida rápida en función de la raza y las características de ingresos de un área?
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(haven)
+library(kableExtra)
+library(skimr)
+library(broom)
+library(stargazer)
+```
+
+```{r}
+discrim <- read_dta("discrim.dta") %>% 
+  na.omit()
+``` 
+
+a) ¿Cuántas variables y observaciones contiene la base de datos?
+
+```{r results='hide'}
+glimpse(discrim)
+```
+
+b) Muestre las primeras 10 observaciones.
+
+```{r}
+discrim %>% 
+  slice_head(n=10) 
+```
+
+c) Determine los valores promedio, en la muestra, de `prpblck` (proporción de población afroamericana) y de `income` (ingreso familiar promedio), junto con sus desviaciones estándar. ¿Cuáles son las unidades de `prpblck` e `income`?
+
+```{r}
+discrim %>% 
+  select("psoda", "income", "prpblck") %>% 
+  skim() %>% 
+  yank("numeric") %>%
+  select(-c("n_missing", "complete_rate", "hist")) %>%
+  kbl(booktabs = T, 
+      col.names = c("Variables", "Media", "Desv. Estándar", "Mínimo", 
+                    "p25", "p50", "p75", "Máximo"),
+      linesep = '', 
+      digits = 1) %>%
+  kable_styling(full_width = F, latex_options = c("striped", "hold_position"))
+```
+
+d) Muestre la relación entre las variables `psoda`, `prpblck` e `income`, usando una matriz de dispersión. 
+
+```{r fig.align='center'}
+discrim %>% 
+  select("psoda", "prpblck", "income") %>% 
+  pairs()
+```
+
+e) Considere un modelo para explicar el precio de las bebidas refrescantes, `psoda`, en términos de la proporción de población afroamericana y de ingreso promedio: 
+
+$$
+psoda = \beta_0 + \beta_1 \cdot (prpblck) + \beta_2 \cdot (income) + u
+$$
+Estime este modelo mediante MCO y muestre un resumen con los resultados de la estimación obtenidos.
+ 
+
+<center>
+```{r results='asis'}
+model <- lm(psoda ~ prpblck + income , data = discrim) 
+
+stargazer(list(model), 
+          type = "html", 
+          header = FALSE, 
+          no.space = TRUE,
+          digits=6)
+```
+</center>
+
+$$
+\widehat{psoda} = 0.956 + 0.148 \cdot (prpblck) + 0.000002 \cdot (income) 
+$$
+
+```{r eval=FALSE, include=FALSE}
+model %>% 
+  tidy() %>% 
+  kbl(booktabs = T, linesep = '', digits = 6) %>% 
+  kable_styling(full_width = F, latex_options = c("striped", "hold_position"))
+```
+
+f) Interprete el intercepto.
+
+**R**: En el caso de zonas que no tienen población afroamericana (`prpblck`=0) y la variable `income` toma valor 0 para esa observación, entonces el precio promedio de una soda mediana es de 0.9411 dólares. 
+
+g) Interprete el coeficiente de prpblck y el de income.
+
+**R**: Digamos que, manteniendo las demás variables constantes, si `prpblack` aumenta en 0.10 (10 puntos porcentuales), el precio de la soda mediana se estima que aumente en 0.0148 dólares, o casi 1.5 centavos. En el caso de `income`, si la mediana de ingreso de una familia aumenta en 1 dólar, manteniendo el resto de las variables constantes, entonces el precio promedio de la soda mediana se estima que aumente en en 0.000002 dólares. 
+
+h) Interprete el R-squared obtenido en (e).
+
+**R:** El R-squared obtenido indica que las variables `prpblck` e `income`, en conjunto, explican un 9.1% de la variabilidad de la variable regresada, psoda. 
+
+i) Calcule la predicción del modelo para psoda cuando la proporción de población afroamericana es un 15\% y se tiene un ingreso familiar medio de 40000 dólares.
+
+$$
+psoda = \beta_0 + \beta_1 \cdot (prpblck) + \beta_2 \cdot (income) + u
+$$
+
+$$
+\widehat{psoda} = 0.956 + 0.115 \cdot (prpblck) + 0.000002 \cdot (income) 
+$$
+
+$$
+\widehat{psoda} = 0.956 + 0.115 \cdot (0.15) + 0.000002 \cdot (40000) 
+$$
+
+$$
+\widehat{psoda} = 0.956 + 0.01725 + 0.064 = 1.03725\ \  dólares
+$$
+
+
+i) Calcule un intervalo de confianza para $\beta_1$ utilizando un nivel de confianza del 95%.
+
+```{r}
+confint(model, "prpblck", level = 0.95) %>% 
+  kbl(booktabs = T, linesep = '', digits = 6) %>% 
+  kable_styling(full_width = F, latex_options = c("striped", "hold_position"))
+```
+
+j) Calcule los precios de las sodas predichos por el modelo y los residuos. Muestre las primeras 10 observaciones de las variables `psoda`, psoda estimado y los residuos estimados por el modelo. 
+
+
+```{r}
+discrim %>% 
+  mutate(Predpsoda = predict(model),
+         Residuo = residuals(model)) %>% 
+  select("psoda", "Predpsoda", "Residuo") %>% 
+  slice_head(n=10) %>% 
+  kbl(booktabs = T, linesep = '', digits = 6) %>% 
+  kable_styling(full_width = F, latex_options = c("striped", "hold_position"))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
