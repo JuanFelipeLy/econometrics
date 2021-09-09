@@ -1,0 +1,79 @@
+---
+title: "Ayudantía 4"
+author: "Juan Felipe Ly"
+date: "09/09/2021"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+subtitle: Econometría I
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+```{r echo=FALSE}
+library(stargazer)
+library(tidyverse)
+library(janitor)
+library(kableExtra)
+library(wooldridge)
+```
+
+```{r}
+wage1 <- wage1
+```
+
+# Comentes
+
+1. Si una variable es estadísticamente significativa, entonces es económicamente significativa.
+
+2. Un alto $R^2$ asegura que la estimación de un modelo de regresión lineal es buena.
+
+3. En el siguiente modelo $Y = \beta + u$ el estimador de MCO de $\beta$ es igual a la media muestral de la variable dependiente $(\overline{Y})$.
+
+4. El teorema de Gauss-Markov establece que dentro de la clase de estimadores insesgados el estimador MCO es el más eficiente.
+
+
+# Problemas
+
+## 1. Relación entre Salario, Educación, Experiencia y Antiguedad
+
+Usando datos incluidos en el archivo `wage1.dta`, se estima el siguiente modelo que puede usarse para estudiar las variables que afectan el salario percibido:
+
+$$
+ln(wage_i)= \beta_0+ \beta_1 \cdot educ_i + \beta_2 \cdot exper_i +  \beta_3 \cdot {exper_i}^2 +\beta_4 \cdot tenure_i + u_i
+$$
+
+Este modelo relaciona el logaritmo del salario del individuo, `lwage`, con su nivel de educación, `educ`, años de experiencia laboral, `exper`, el cuadrado de la experiencia laboral `expersq`, y años de antigüedad laboral, `tenure`. Por otro lado, $u$ es un shock estocástico bien comportado. Parte de los resultados de la estimación del modelo se muestran en la tabla 1:
+
+En base a la información presentada, responda lo siguiente:
+
+a) Interprete el significado de $\hat{\beta_3}$. ¿Cómo se interpreta su valor negativo? (4 puntos)
+
+b) ¿Son las variables `educ` y `tenure` estadísticamente significativas al 5% de significancia? Justifique su respuesta.
+
+c) ¿Cuál es su predicción del salario de una persona que tiene 20 años de educación, 25 años de experiencia laboral y 23 años de antiguedad en la empresa?
+
+d) Explique brevemente qué significa el valor $R^2 = 0.359$.
+
+
+<center>
+```{r results='asis', echo=FALSE, out.width="50%"}
+modelo1 <- lm(lwage ~ educ + exper + expersq +  tenure,
+              data=wage1)
+
+stargazer(modelo1, 
+          type= "latex",
+          title = "Tabla 1",
+          header = FALSE,
+          no.space = TRUE)
+```
+</center>
+
+
+
+
+
+
