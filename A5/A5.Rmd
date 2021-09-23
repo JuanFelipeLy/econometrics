@@ -1,0 +1,202 @@
+---
+title: "Ayudantía 5"
+author: "Juan Felipe Ly"
+date: "23/09/2021"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+subtitle: Econometría I
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+```{r echo=FALSE}
+library(stargazer)
+library(tidyverse)
+library(janitor)
+library(kableExtra)
+library(wooldridge)
+```
+
+```{r}
+wage1 <- wage1
+```
+
+# 1. Relación entre Salario, Educación, Experiencia y Género
+
+Usando datos incluidos en el archivo `wage1.dta`, un economista quiere estudiar las variables que afectan el salario percibido en los CEOs de compañías financieras.Para ello estima los siguientes modelos:
+
+$$
+ln(wage_i)= \beta_0+ \beta_1 \cdot educ_i + \beta_2 \cdot exper_i +  \beta_3 \cdot {exper_i}^2 +\beta_4 \cdot female_i + u_i \ \ \ \ \ \ \ \ \ \ \ \ (1)
+$$
+
+$$
+ln(wage_i)= \beta_0+ \beta_1 \cdot educ_i + \beta_2 \cdot exper_i +  \beta_3 \cdot {exper_i}^2 +\beta_4 \cdot female_i + \beta_5 \cdot tenure_i+ u_i \ \ \ \ \ \ \ \ \ \ \ \ (2)
+$$
+
+$$
+ln(wage_i)= \beta_0+ \beta_1 \cdot educ_i + \beta_2 \cdot exper_i + \beta_3 \cdot {exper_i}^2 + \beta_4 \cdot female_i + \beta_5 \cdot tenure_i + \beta_6 \cdot (exper_i \times female_i) + u_i \ \ \ \ \ \ \ \ \ \ \ \ (3)
+$$
+
+
+Estos modelos relacionan el logaritmo del salario del individuo, `lwage`, con su nivel de educación, `educ`, años de experiencia laboral, `exper`, el cuadrado de la experiencia laboral `expersq`, años de antigüedad laboral, `tenure`, si la observación es mujer, `female`. Por otro lado, $u$ es un shock estocástico bien comportado. Parte de los resultados de la estimación de los modelos se muestran en la siguiente tabla:
+
+<center>
+```{r results='asis', echo=FALSE, out.width="50%"}
+modelo1 <- lm(lwage ~ educ + exper + expersq +  female,
+              data=wage1)
+
+modelo2 <- lm(lwage ~ educ + exper + expersq +  female + tenure,
+              data=wage1)
+
+modelo3 <- lm(lwage ~ educ + exper + expersq +  female + tenure + exper*female,
+              data=wage1)
+
+stargazer(modelo1, modelo2, modelo3, 
+          type= "html",
+          header = FALSE,
+          no.space = TRUE)
+```
+</center>
+
+\
+\
+
+<center>
+```{r results='asis', echo=FALSE}
+covmatrix1 <- vcov(modelo2)
+
+stargazer(covmatrix1, 
+          title = "Matriz de Covarianzas Modelo (2)",
+          type = "html",
+          header = FALSE,
+          digits = 5,
+          no.space = TRUE)
+
+```
+</center>
+
+\
+\
+
+En base a la información presentada, responda lo siguiente:
+
+a) Interprete el significado de $\hat{\beta_6}$ del modelo (3). ¿Cómo se interpreta su valor negativo?
+
+**R**: Por cada año de aumento adicional de experiencia laboral de una mujer, el salario disminuye, en promedio, un 0,007%. El signo negativo indica que afecta de manera negativa en el salario promedio predicho por el modelo.
+
+b) En relación al modelo (2) ¿Son las variables `female` y `tenure` estadísticamente significativas al 5% de significancia (95% de confianza)? Justifique su respuesta.
+
+**R**: El test t para $\hat{\beta_4}$ viene dado por: 
+
+$$
+t^c= \frac{-0.298}{0.036} = 8.27\bar 7
+$$
+
+El valor crítico al 5% de una distribución t con 520 $(n-k-1)$ grados de libertad es 1,96 (se utiliza el valor cuando n tiende a infinito; también podría usarse para una muestra de 120 observaciones). Por lo tanto, dado que $|t^c| > 1,96$, se rechaza la hipótesis nula, y el parámetro es estadísticamente significativo. 
+
+El test t para $\hat\beta_5$ viene dado por: 
+
+$$
+t^c= \frac{0.016}{0.003}=5.3\bar 3
+$$
+
+Dado que $|t^c| > 1,96$, se rechaza la hipótesis nula, y el parámetro es estadísticamente significativo. 
+
+
+c) En relación al modelo 3 ¿Cuál es su predicción del salario de una mujer CEO que tiene 15 años de educación, 20 años de experiencia laboral y 10 años de antiguedad en la empresa?
+
+**R**:  
+
+$$
+lwage_i= \beta_0+ \beta_1 \cdot educ_i + \beta_2 \cdot exper_i + \beta_3 \cdot {exper_i}^2 + \beta_4 \cdot female_i + \beta_5 \cdot tenure_i + \beta_6 \cdot (exper_i \times female_i) + u_i
+$$
+
+
+$$
+\widehat{lwage_i}= 0.328 + 0.083 \cdot educ_i + 0.037 \cdot exper_i - 0.001 \cdot {exper_i}^2 - 0.184 \cdot female_i + 0.015 \cdot tenure_i - 0.007 \cdot (exper_i \times female_i)
+$$
+
+
+$$
+\widehat{lwage_i}= 0.328 + 0.083 \cdot (15) + 0.037 \cdot (20) - 0.001 \cdot (20)^2 - 0.184 \cdot (1) + 0.015 \cdot (10) - 0.007 \cdot (20 \times 1)
+$$
+
+$$
+\widehat{lwage_i}= 1.739
+$$
+
+¿Cómo se interpreta este valor? 
+
+La variable regresada representa el logaritmo natural del salario, por lo que debemos aplicar euler para obtener el valor en miles de dólares:
+
+$$
+e^\widehat{lwage_i}= e^{1.739} 
+$$
+
+$$
+\widehat{wage_i}= 5.691
+$$
+
+Por lo tanto, como la variable wage está medida en miles de dólares, el modelo predice un salario promedio de $5691$ dólares anuales para una mujer CEO con las características demográficas que indica el enunciado.
+
+
+d) Es el modelo (3) globalmente significativo al 5\% de significancia? 
+
+**R**: La hipótesis nula viene dada por: 
+
+$$
+H_0: \beta_1 = \beta_2 = \beta_3 = \beta_4 = \beta_5 = \beta_6 = 0
+$$
+
+El test global viene dado por:
+
+$$
+F=\frac {R^2/k}{(1-R^2)/(n-k-1)} \sim F_{k,n-k-1}
+$$
+
+$$
+F=\frac {0.441/6}{(1-0.441)/(526-6-1)}
+$$
+$$
+F = \frac{0.0735}{0.00108}
+$$
+
+$$
+F=68.345
+$$
+
+El valor crítico de una distribución F al 5% de significancia con 6 grados de libertad en el numerador y 519 $(n-k-1)$ grados de libertad en el denominador es $2.0986$. Por lo tanto, dado que $F^c > 2.0986$, se rechaza la hipótesis nula, y el modelo es globalmente significativo. 
+
+e) En relación al coeficiente de determinación de los tres modelos, ¿cuál es el que presenta una mejor línea de ajuste? 
+
+**R**: Se puede observar que el mejor $R^2$ ajustado se presenta en el modelo 3 con ${\bar R}^2 = 0.435$, a pesar de que los tres modelos tienen todos sus coeficientes estadísticamente significativos y tienen estadísticos F sobre $2.6$. Recuerde que el $\bar R^2$ penaliza la inclusión de variables en el modelo, por lo que es una mejor medida de determinación de qué modelo utilizar.
+
+f) (TAREA) Testee la siguiente hipótesis respecto al modelo (2): $H_0: \beta_1 = \beta_4$ 
+
+
+
+
+
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+
