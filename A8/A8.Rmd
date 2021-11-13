@@ -1,0 +1,176 @@
+---
+title: "Ayudantía 8"
+subtitle: "Econometría I (ICO8106_CA02)"
+author: "Juan Felipe Ly"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+```{r echo=FALSE}
+library(stargazer)
+library(tidyverse)
+library(janitor)
+library(kableExtra)
+library(haven)
+library(wooldridge)
+library(infer)
+library(broom)
+library(skimr)
+```
+
+```{r echo=FALSE}
+wage1 <- wage1 # problema 1
+bwght <- bwght # problema 2
+ceosal1 <- ceosal1 # problema 3
+catholic <- catholic  #problema 4
+```
+
+# Comentes
+
+Comente en no más de 5 líneas si las siguientes afirmaciones son verdaderas, falsas o inciertas.
+
+1. Si existe inclusión de variables irrelevantes, es más probable cometer error tipo II en los tests de hipótesis que se realicen.
+
+**R:** Se comete error tipo II cuando no rechazamos una hipótesis que debía ser rechazada; incluir variables irrelevantes genera varianzas mayores de nuestros estimadores, por lo que es más probable no rechazar el test de significancia cuando en realidad sí debimos haberlo rechazado. El comente es verdadero.
+
+2. Dos economistas discuten acerca del modelo de salarios de Mincer (1958). Uno de ellos le dice al otro que para solucionar el tema de la habilidad de los individuos como variable omitida, incluirá `test scores` (como pruebas de inteligencia, calificaciones, etc. Ej: IQ Test) como una proxy de esta variable. Con esta solución, las estimaciones obtenidas serán insesgadas.
+
+**R:** Incierto. Si bien la inclusión de una proxy para la habilidad de los individuos en una ecuación de Mincer tiende a eliminar el sesgo de variable omitida, los test scores (como pruebas de inteligencia, calificaciones, etc.) podrían adolecer de error de medida, lo que se traduciría en un sesgo (hacia abajo) en las estimaciones del modelo.
+
+3. El director de carrera le pide realizar la estimación de un modelo que presente estimaciones consistentes e insesgadas. Usted se percata de que no existe endogeneidad en las variables de su modelo. Dado lo anterior, decide que es conveniente utilizar el estimador de 2 etapas (MC2E) utilizando variables instrumentales para asegurarse de no cometer problemas de sesgo e inconsistencia. Comente.
+
+**R:** Incierto. Si bien dicho estimador es consistente aún sin problemas de endogeneidad, el estimador con variables instrumentales es ineficiente, por lo que sólo debiese utilizarse si es que efectivamente hay un problema de endogeneidad. Para testear esto, se puede realizar el Test de Hausmann que testea endogeneidad. De rechazar la nula (homogeneidad), se debería utilizar variables instrumentales.
+
+4. Un problema que podemos encontrar en una regresión de la forma $ln (y_i) = \beta_0+ \beta_1 \cdot x_i + u_i$, donde $y_i$ corresponde al ingreso laboral y $x_i$ al promedio de notas obtenidos durante el colegio y la universidad, es que la gente suele no recordar el valor exacto de $x$ e $y$, y se suele redondear mucho (hacia arriba o hacia abajo), por lo tanto ambas variables están medidas con un alto grado de error. De esta forma, estos problemas harían que las estimaciones con estos datos sean inválidas. Comente.
+
+**R:** El problema que se presenta es el de error de medición. Se sabe que un error de medición en la variable dependiente no generará problemas de estimación, ya que será absorbido por el término de error. Lo que sí provocará, es un aumento en la varianza del error y por tanto, estimaciones menos precisas. Sin embargo, cuando el error de medición se produce en las variables independientes, el término de error ahora está correlacionado con las variables independientes del modelo, lo que genera estimaciones sesgadas e inconsistentes. Para solucionar este problema, se podría utilizar el método de Variables Instrumentales. 
+
+\pagebreak
+
+# Problemas
+
+## 1. Relación entre Salario, Educación y Estado Civil
+
+Usando datos incluidos en el archivo `wage1.dta`, se estima el siguiente modelo que puede usarse para estudiar las variables que afectan el salario percibido:
+
+$$
+ln(wage_i)= \beta_0+ \beta_1 \cdot educ_i +  \beta_2 \cdot married_i +\beta_3 \cdot (educ_i \times married_i) + u_i
+$$
+
+Este modelo relaciona el logaritmo del salario del individuo, `lwage`, con su nivel de educación, `educ`, y si está o no casado, `married`. Por otro lado, $u$ es un shock estocástico bien comportado. Parte de los resultados de la estimación del modelo se muestran en la siguiente tabla:
+
+```{r results='asis', echo=FALSE, out.width="20%"}
+modelo1 <- lm(lwage ~  educ*married, 
+              data=wage1)
+  
+
+stargazer(modelo1, 
+          type= "latex",
+          header = FALSE,
+          no.space = TRUE,
+          single.row = T
+          )
+```
+
+a) (6 puntos) Interprete $\widehat  \beta_3$. ¿Es el estimador estadísticamente significativo al 95% de confianza?
+
+**R:** El coeficiente $\widehat \beta_3=-0.002$ captura el efecto de los años de educación de personas casadas sobre el salario; indica que para aquellas personas casadas, un año adicional de educación disminuye el salario, en promedio, manteniendo las otras variables contantes, en 0.2%. El test $t^c$ para $\hat{\beta_3}$ viene dado por: 
+
+$$t^c= - \frac{0.002}{0.015}= -0.13$$
+
+El valor crítico al 5% de una distribución t con 522 $(n-k-1)$ grados de libertad es $1,96$ (se utiliza el valor cuando n tiende a infinito; también podría usarse para una muestra de 120). Por lo tanto, dado que $|t^c| < 1,96$, no se rechaza la hipótesis nula, y el estimador no es estadísticamente significativo. 
+
+b) (9 puntos) Argumente si existe o no problema de omisión de variable relevante en el modelo, y cómo podría solucionarlo en caso de que exista.
+
+**R:** El modelo planteado omite claramente algunas variables que son relevantes, como por ejemplo, la habilidad, la antiguedad al cuadrado (para ver perfil creciente o decreciente de la experiencia), y variables que reflejen características cualitativas como género. Por lo tanto, la estimación por MCO será sesgada; la dirección de este sesgo dependerá de la correlación de la posible variable omitida con las variables explicativas y con la variable dependiente del modelo. Además, se producirá un sesgo en la estimación de la varianza muestral y se sobreestimará la varianza de los errores. Este problema se puede solucionar utilizando el método de Variables Instrumentales: identificar un instrumento relevante y exógeno para corregir el sesgo que produce el omitir variables relevantes en el modelo.
+
+Suponga que para el modelo anterior usted ahora tiene la siguiente información: 
+
+$$
+V(u_i) = \sigma^2 \cdot educ^4_i \ \ \ \ \forall \ \ i = 1,2... \ n \\
+$$
+
+c) (5 puntos) ¿Qué problema existe al realizar una estimación por MCO?
+
+**R:** Dado $V(u_i) = \sigma^2 \cdot educ^4_i$ se sabe que el modelo tiene un problema de Heterocedasticidad, por lo que el estimador MCO será consistente e insesgado, pero ineficiente, lo que implica que los estimadores por MCO no serán MELI, ya que no se cumple la M de "mejor" estimador. 
+
+d) (9 puntos) Dado lo anterior, ¿Cuál es el método más apropiado para estimar los parámetros del modelo inicial?, ¿Por qué?
+
+**R:** Lo más apropiado sería utilizar el método de Minimos Cuadrados Generalizados (MCG) para corregir por heterocedasticidad. Esto, dado que se conoce la "estructura" de la varianza de los errores, dada por:
+
+$$
+E[\epsilon \epsilon'] = \sigma^2 \cdot \Omega= \begin{bmatrix}
+    \sigma^2\cdot educ^4_1 & 0 & \dots  & 0 \\
+    0 & \sigma^2 \cdot educ^4_{2} & \dots  & 0 \\
+    \vdots & \vdots  & \ddots & \vdots \\
+    0 & 0 & \dots  & \sigma^2 \cdot educ^4_{n}
+\end{bmatrix}
+$$
+
+Donde en la diagonal se encuentran las varianzas de los errores, y en todos los demás espacios las covarianzas de los errores, que por enunciado sabemos iguales a cero. De esta forma, el estimador MCG será MELI. 
+
+\pagebreak
+
+## 2. Relación entre Salario, Experiencia y Género
+
+Usando datos incluidos en el archivo `wage1.dta`, se estima el siguiente modelo que puede usarse para estudiar las variables que afectan el salario percibido:
+
+$$
+ln(wage_i)= \beta_0+ \beta_1 \cdot exper_i +  \beta_2 \cdot female_i +\beta_3 \cdot (exper_i \times female_i) + u_i
+$$
+
+Este modelo relaciona el logaritmo del salario del individuo, `lwage`, con sus años de experiencia laboral, `exper`, y si es mujer o no, `female`. Por otro lado, $u$ es un shock estocástico bien comportado. Parte de los resultados de la estimación del modelo se muestran en la siguiente tabla:
+
+```{r results='asis', echo=FALSE, out.width="20%"}
+modelo2 <- lm(lwage ~  exper*female, 
+              data=wage1)
+
+stargazer(modelo2, 
+          type= "latex",
+          header = FALSE,
+          no.space = TRUE,
+          single.row = T
+          )
+```
+
+a) (6 puntos) Interprete $\widehat  \beta_3$. ¿Es el estimador estadísticamente significativo al 95% de confianza?
+
+**R:** El coeficiente $\widehat \beta_3=-0.006$ captura el efecto de los años de experiencia laboral de las mujeres sobre el salario; indica que para las mujeres, un año adicional de experiencia laboral disminuye el salario, en promedio, manteniendo las demás variables contantes, en 0.6%. El test $t^c$ para $\hat{\beta_3}$ viene dado por: 
+
+$$t^c= - \frac{0.006}{0.003}= -2$$
+
+El valor crítico al 5% de una distribución t con 522 $(n-k-1)$ grados de libertad es $1,96$ (se utiliza el valor cuando n tiende a infinito; también podría usarse para una muestra de 120). Por lo tanto, dado que $|t^c| > 1,96$, se rechaza la hipótesis nula, y el estimador es estadísticamente significativo. 
+
+b) (9 puntos) Argumente si existe o no problema de omisión de variable relevante en el modelo, y cómo podría solucionarlo en caso de que exista.
+
+**R:** El modelo planteado omite claramente algunas variables que son relevantes, como por ejemplo, la habilidad, años de educación, la antiguedad al cuadrado (para ver perfil creciente o decreciente de la experiencia), y variables que reflejen características cualitativas como género. Por lo tanto, la estimación por MCO será sesgada; la dirección de este sesgo dependerá de la correlación de la posible variable omitida con las variables explicativas y con la variable dependiente del modelo. Además, se producirá un sesgo en la estimación de la varianza muestral y se sobreestimará la varianza de los errores. Este problema se puede solucionar utilizando el método de Variables Instrumentales: identificar un instrumento relevante y exógeno para corregir el sesgo que produce el omitir variables relevantes en el modelo.
+
+Suponga que para el modelo anterior usted ahora tiene la siguiente información: 
+
+$$
+V(u_i) = \sigma^2 \cdot exper^4_i \ \ \ \ \forall \ \ i = 1,2... \ n \\
+$$
+
+c) (5 puntos) ¿Qué problema existe al realizar una estimación por MCO?
+
+**R:** Dado $V(u_i) = \sigma^2 \cdot exper^4_i$ se sabe que el modelo tiene un problema de Heterocedasticidad, por lo que el estimador MCO será consistente e insesgado, pero ineficiente, lo que implica que los estimadores por MCO no serán MELI, ya que no se cumple la M de "mejor" estimador. 
+
+d) (9 puntos) Dado lo anterior, ¿Cuál es el método más apropiado para estimar los parámetros del modelo inicial?, ¿Por qué?
+
+**R:** Lo más apropiado sería utilizar el método de Minimos Cuadrados Generalizados (MCG) para corregir por heterocedasticidad. Esto, dado que se conoce la "estructura" de la varianza de los errores, dada por:
+
+$$
+E[\epsilon \epsilon'] = \sigma^2 \cdot \Omega= \begin{bmatrix}
+    \sigma^2\cdot exper^4_1 & 0 & \dots  & 0 \\
+    0 & \sigma^2 \cdot exper^4_{2} & \dots  & 0 \\
+    \vdots & \vdots  & \ddots & \vdots \\
+    0 & 0 & \dots  & \sigma^2 \cdot exper^4_{n}
+\end{bmatrix}
+$$
+
+Donde en la diagonal se encuentran las varianzas de los errores, y en todos los demás espacios las covarianzas de los errores, que por enunciado sabemos iguales a cero. De esta forma, el estimador MCG será MELI. 
+
+
