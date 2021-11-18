@@ -77,7 +77,7 @@ stargazer(modelo1,
 
 a) (6 puntos) Interprete $\widehat  \beta_3$. ¿Es el estimador estadísticamente significativo al 95% de confianza?
 
-**R:** El coeficiente $\widehat \beta_3=-0.002$ captura el efecto de los años de educación de personas casadas sobre el salario; indica que para aquellas personas casadas, un año adicional de educación disminuye el salario, en promedio, manteniendo las otras variables contantes, en 0.2%. El test $t^c$ para $\hat{\beta_3}$ viene dado por: 
+**R:** El coeficiente $\widehat \beta_3=-0.002$ captura el efecto de los años de educación de personas casadas sobre el salario; indica que para aquellas personas casadas, un año adicional de educación disminuye el salario, en promedio, manteniendo las otras variables contantes, en 0.002%. El test $t^c$ para $\hat{\beta_3}$ viene dado por: 
 
 $$t^c= - \frac{0.002}{0.015}= -0.13$$
 
@@ -138,7 +138,7 @@ stargazer(modelo2,
 
 a) (6 puntos) Interprete $\widehat  \beta_3$. ¿Es el estimador estadísticamente significativo al 95% de confianza?
 
-**R:** El coeficiente $\widehat \beta_3=-0.006$ captura el efecto de los años de experiencia laboral de las mujeres sobre el salario; indica que para las mujeres, un año adicional de experiencia laboral disminuye el salario, en promedio, manteniendo las demás variables contantes, en 0.6%. El test $t^c$ para $\hat{\beta_3}$ viene dado por: 
+**R:** El coeficiente $\widehat \beta_3=-0.006$ captura el efecto de los años de experiencia laboral de las mujeres sobre el salario; indica que para las mujeres, un año adicional de experiencia laboral disminuye el salario, en promedio, manteniendo las demás variables contantes, en 0.006%. El test $t^c$ para $\hat{\beta_3}$ viene dado por: 
 
 $$t^c= - \frac{0.006}{0.003}= -2$$
 
