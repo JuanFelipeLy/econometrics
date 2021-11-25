@@ -1,0 +1,173 @@
+---
+title: "Ayudantía 9"
+author: "Juan Felipe Ly"
+subtitle: Econometría I (ICO8106_CA02)
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+```{r echo=FALSE}
+library(stargazer)
+library(tidyverse)
+library(wooldridge)
+```
+
+```{r echo=FALSE}
+wage1 <- wage1
+```
+
+# Comentes
+
+Comente en no más de 5 líneas si las siguientes afirmaciones son verdaderas, falsas o inciertas.
+
+1. Cuando varios regresores presentan multicolinealidad perfecta, los coeficientes de uno o más de estos regresores se estimarán de manera imprecisa, es decir, tendrán una mayor varianza muestral.
+
+**R:** No se puede invertir matriz (X'X), por lo que no se pueden calcular las estimaciones. 
+
+2. En relación al Factor inflacionario de Varianza (FIV), un $FIV_j$ mayor que 10 significa que, independientemente del tamaño de la muestra, el error estándar de $\hat\beta_j$ es demasiado grande para ser útil. 
+
+**R:** Si bien un FIV mayor a 10 nos indica que la multicolinealidad es un problema para estimar $\beta_j$, no implica que el error estándar de $\hat \beta_j$ sea demasiado grande para ser útil, ya que el error estándar depende también de $\sigma^2$ y de $STC_j$, y este último puede incrementarse aumentando el tamaño de la muestra. Por lo tanto, el tamaño de la muestra es un factor relevante para concluir la utilidad de las estimaciones en presencia de multicolinealidad.
+
+3. Se le pide que diseñe un modelo de regresión lineal que se usará para inferencia causal entre algunas variables de la industria financiera. Dado lo anterior, usted afirma que hay que dar importancia a la selección de variables que se encuentran altamente correlacionadas con con la variable dependiente. 
+
+**R:** Si el modelo de regresión se usará para inferencia causal, el sesgo de variable omitida y la selección de variables de control es importante. Por otra parte, si el propósito del modelo de regresión es la predicción, entonces la selección de variables que se encuentran altamente correlacionadas con con la variable dependiente es más importante.
+
+4. Una buena forma de eliminar el problema de heterocedasticidad en un modelo econométrico cuando no se tiene la estructura de la matriz de los errores es utilizar Mínimos Cuadrados Generalizados (MCG)
+
+**R:** Incierto. Si existe evidencia de heterocedasticidad y no se conoce la estructura de la matriz de la varianza de los errores, se puede usar errores estándar robustos a heterocedasticidad y tener la confianza que los errores estándar, test t e intervalos de confianza son válidos en muestras grandes. Si se conoce la estructura de la matriz de la varianza de los errores, se puede utilizar el método MCG. Sin embargo, si no se conoce la estructura de la varianza de los errores, se puede utilizar la forma flexible llamada heterocedasticidad multiplicativa, representada de la forma $\sigma^2_i = \sigma^2_i\cdot h(z_{i2},...,z_{is})$; Mínimos Cuadrados Generalizados Factibles (MCGF), entre otros.
+
+5. Suponga que se desea probar si un mismo modelo de regresión describe los promedios generales de calificaciones de atletas universitarios hombres y de las atletas universitarias mujeres. Después de realizar un test Breusch-Pagan, se le informa que existe evidencia de heterocedasticidad. Dado lo anterior, lo mejor sería realizar un test de Chow. Comente.
+
+**R:** La prueba de Chow es una prueba F y sólo es válida bajo homocedasticidad. En particular, bajo la hipótesis nula, las varianzas del error de los dos grupos deben ser iguales.
+
+
+# Problemas
+
+## 1. Relación entre Salario, Educación y Estado Civil
+
+El siguiente modelo relaciona el logaritmo del salario del individuo, lwage, con su nivel de educación, educ, si es o no mujer, female, y si está o no casada, married:
+
+$$
+ln(wage_i)= \beta_0+ \beta_1 \cdot educ_i + \beta_2 \cdot married_i + \beta_3 \cdot female_i + \beta_{4} \cdot (educ_i \times married_i) + u_i
+$$
+
+<center>
+```{r comment = ''}
+lmtest::bptest(lwage ~  educ*married + female, 
+              data=wage1)
+```
+</center>
+
+\
+
+<center>
+```{r results='asis', echo=FALSE, out.width="20%"}
+modelo1 <- lm(lwage ~  educ*married + female, 
+              data=wage1)
+  
+
+stargazer(modelo1,
+          type= "html",
+          header = FALSE
+          )
+```
+</center>
+
+\
+
+En base a los resultados de la estimación del modelo y el test Breusch-Pagan, responda lo siguiente:
+
+
+a) (6 puntos) Interprete $\widehat  \beta_4$.
+
+**R:** El coeficiente $\widehat \beta_4=-0.003$ captura el efecto que tienen los años de educación de aquellas personas que están casadas sobre el logaritmo del salario; indica que para las personas casadas, un año adicional de educación disminuye el salario, en promedio, manteniendo las demás variables contantes, en 0.003%.
+
+b) En base a los resultados del modelo y del test Breusch-Pagan. ¿Qué puede concluir?
+
+**R:** El test Breusch-Pagan nos otorga un p-value igual a $0.1097$, lo cual implica que, asumiendo un nivel de significancia del 5%, $p-value_{BP} > 0.05$; por lo tanto, no existe evidencia estadística para rechazar la hipótesis nula que indica presencia de homocedasticidad. Además, sabemos que se cumple que $BP < 10$, ya que el test Breusch Pagan nos otorga un valor BP=7.5466, por ende el estadístico nos reafirma que no se está en presencia de heterocedasticidad. 
+
+\
+
+## 2. Relación entre Salario, Experiencia y Género
+
+El siguiente modelo relaciona el logaritmo del salario del individuo, lwage, con sus años de experiencia laboral, exper, si es o no mujer, female, y si está o no casada, married:
+
+$$
+ln(wage_i)= \beta_0+ \beta_1 \cdot exper_i +  \beta_2 \cdot married_i +\beta_3 \cdot female_i + \beta_4 \cdot (married_i \times female_i) + u_i
+$$
+
+Parte de los resultados de la estimación del modelo y el test Breusch-Pagan se muestran en la siguiente tabla:
+
+\
+
+<center>
+```{r comment= ''}
+lmtest::bptest(lwage ~ exper +  married*female, 
+              data=wage1)
+```
+</center>
+
+\
+
+<center>
+```{r results='asis', echo=FALSE, out.width="20%"}
+modelo2 <- lm(lwage ~ exper +  married*female, 
+              data=wage1)
+
+stargazer(modelo2, 
+          type= "html",
+          header = FALSE,
+          no.space = TRUE
+          )
+```
+</center>
+
+\
+
+En base a los resultados de la estimación del modelo y el test Breusch-Pagan, responda lo siguiente:
+
+a) (6 puntos) Interprete $\widehat  \beta_4$.
+
+**R:** El coeficiente $\widehat \beta_4=-0.373$ captura el efecto que tiene el ser mujer y estar casada sobre el logaritmo del salario; indica que las mujeres casadas ven disminuído el logaritmo de su salario, en promedio, manteniendo las demás variables contantes, en 0.373%.
+
+b) En base a los resultados del modelo y del test Breusch-Pagan. ¿Qué puede concluir?
+
+**R:** El test Breusch-Pagan nos otorga un p-value igual a $0.0212$, lo cual implica que, asumiendo un nivel de significancia del 5%, $p-value_{BP} < 0.05$; por lo tanto, existe evidencia estadística para rechazar la hipótesis nula que indica presencia de homocedasticidad. Además, sabemos que se cumple que $BP > 10$, ya que el test Breusch-Pagan nos otorga un valor BP=11.532: nos reafirma que se está en presencia de heterocedasticidad. 
+
+c) (5 puntos) Suponga que para el modelo anterior usted ahora tiene la siguiente información: 
+
+$$
+V(u_i) = \sigma^2 \cdot exper^2_i \ \ \ \ \forall \ \ i = 1,2... \ n \\
+$$
+
+¿Qué problema existe al realizar una estimación por MCO? ¿Cuál es el método más apropiado para estimar los parámetros del modelo inicial?
+
+**R:** Dado $V(u_i) = \sigma^2 \cdot exper^2_i$ se sabe que el modelo tiene un problema de Heterocedasticidad, por lo que el estimador MCO será consistente e insesgado, pero ineficiente, lo que implica que los estimadores por MCO no serán MELI, ya que no se cumple la M de "mejor" estimador. 
+
+d) (9 puntos) Dado lo anterior, ¿Cuál es el método más apropiado para estimar los parámetros del modelo inicial?, ¿Por qué?
+
+**R:** Lo más apropiado sería utilizar el método de Minimos Cuadrados Generalizados (MCG) para corregir por heterocedasticidad. Esto, dado que se conoce la "estructura" de la varianza de los errores, dada por:
+
+$$
+E[\epsilon \epsilon'] = \sigma^2 \cdot \Omega= \begin{bmatrix}
+    \sigma^2\cdot exper^2_1 & 0 & \dots  & 0 \\
+    0 & \sigma^2 \cdot exper^2_{2} & \dots  & 0 \\
+    \vdots & \vdots  & \ddots & \vdots \\
+    0 & 0 & \dots  & \sigma^2 \cdot exper^2_{n}
+\end{bmatrix}
+$$
+
+Donde en la diagonal se encuentran las varianzas de los errores, y en todos los demás espacios las covarianzas de los errores, que por enunciado sabemos iguales a cero. De esta forma, el estimador MCG será MELI. 
+
+\
+\
+\
+\
+\
+
+
